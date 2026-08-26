@@ -61,10 +61,7 @@ Evaluated under **Stratified 5-Fold Cross-Validation** on the frozen dataset ten
 solar_flare/
 ├── DATA.md                                           # Complete ISRO PRADAN data access & reproducibility guide
 ├── README.md                                         # Main repository benchmark & architecture overview
-├── final_model_benchmark_report.md                  # Comprehensive benchmark report
-├── literature_review_material.md                    # Literature review support documentation
-├── literature_review_ppt_outline.md                 # 11-slide presentation deck outline
-├── paper_outline.md                                  # 9-section journal manuscript outline
+├── requirements.txt                                  # Environment dependencies
 ├── solar_flare_forecasting_complete_research_package.md  # Master all-in-one combined research document
 │
 ├── scripts/                                          # Open-source execution & training scripts
@@ -78,6 +75,10 @@ solar_flare/
 │
 ├── results/                                          # Markdown reports & publication figures
 │   ├── figures/                                      # High-DPI publication figures (.png)
+│   ├── final_model_benchmark_report.md               # Benchmark comparison report
+│   ├── literature_review_material.md                 # Literature review support document
+│   ├── paper_outline.md                              # Journal paper manuscript outline
+│   ├── literature_review_ppt_outline.md              # 11-slide presentation deck outline
 │   ├── threshold_metrics.csv                         # Full threshold sweep metric table
 │   └── benchmark_metrics.csv                         # Consolidated model comparison metrics
 │
@@ -92,7 +93,7 @@ solar_flare/
 ### 1. Installation
 Clone the repository and install dependencies:
 ```bash
-git clone https://github.com/dharani/solar_flare.git
+git clone https://github.com/Dharani1567/solar_flare.git
 cd solar_flare
 python3 -m venv .venv
 source .venv/bin/activate
@@ -114,10 +115,10 @@ python scripts/generate_paper_figures_extended.py
 ## 📄 Key Research Deliverables & Supplementary Material
 
 - 📑 **Master Research Package**: [solar_flare_forecasting_complete_research_package.md](solar_flare_forecasting_complete_research_package.md)
-- 📊 **Final Benchmark Report**: [final_model_benchmark_report.md](final_model_benchmark_report.md)
-- 📚 **Literature Review Material**: [literature_review_material.md](literature_review_material.md)
-- 📝 **Journal Paper Outline**: [paper_outline.md](paper_outline.md)
-- 📊 **PPT Deck Outline**: [literature_review_ppt_outline.md](literature_review_ppt_outline.md)
+- 📊 **Final Benchmark Report**: [results/final_model_benchmark_report.md](results/final_model_benchmark_report.md)
+- 📚 **Literature Review Material**: [results/literature_review_material.md](results/literature_review_material.md)
+- 📝 **Journal Paper Outline**: [results/paper_outline.md](results/paper_outline.md)
+- 📊 **PPT Deck Outline**: [results/literature_review_ppt_outline.md](results/literature_review_ppt_outline.md)
 - 💾 **Data Access Guide**: [DATA.md](DATA.md)
 
 ---
