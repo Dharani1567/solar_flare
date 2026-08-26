@@ -1,0 +1,38 @@
+# Python / Environment
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# ISRO Raw & Extracted Data Archives (Large & Restricted Distribution)
+data/hel1os/raw/
+data/hel1os/extracted/
+data/hel1os/raw_downloads/
+data/hel1os/temp/
+data/solexs/raw/
+data/solexs/extracted/
+data/solexs/temp/
+data/ml/*.npy
+data/ml/*.npz
+*.fits
+*.FITS
+*.zip
+*.ZIP
+*.gz
+*.tar
+
+# Model Weight Checkpoints (Large Binaries)
+results/models/*.pt
+results/models/*.joblib
+results/model_oof_predictions.npz
+results/explainability_attributions.npz
