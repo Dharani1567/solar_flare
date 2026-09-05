@@ -21,6 +21,7 @@ Generates:
 from __future__ import annotations
 
 import time
+import pickle
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -331,6 +332,25 @@ def train_eval_model(
 
         MODEL_DIR.mkdir(parents=True, exist_ok=True)
         fold_ckpt = MODEL_DIR / f"{model_name.lower().replace(' ', '_')}_fold_{fold_idx}.pt"
+        history_pkl = MODEL_DIR / f"{model_name.lower().replace(' ', '_')}_fold_{fold_idx}_history.pkl"
+
+        model = model_cls()
+
+        if fold_ckpt.exists() and history_pkl.exists():
+            print(f"  [CACHE HIT] Loading existing checkpoint for {model_name} Fold {fold_idx} ({fold_ckpt.name})")
+            model.load_state_dict(torch.load(fold_ckpt))
+            model.eval()
+            with torch.no_grad():
+                val_logits = model(torch.tensor(X_val_norm, dtype=torch.float32))
+                val_proba = torch.sigmoid(val_logits).numpy().flatten()
+                val_pred = (val_proba >= 0.5).astype(int)
+            oof_preds[val_idx] = val_pred
+            oof_probas[val_idx] = val_proba
+            continue
+
+        criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=3)
 
         best_val_loss = float("inf")
         patience_counter = 0
@@ -368,6 +388,14 @@ def train_eval_model(
             if patience_counter >= patience:
                 break
 
+        with open(history_pkl, "wb") as pf:
+            pickle.dump({
+                "model_name": model_name,
+                "fold_idx": fold_idx,
+                "best_val_loss": best_val_loss,
+                "epochs_trained": epoch,
+            }, pf)
+
         model.load_state_dict(torch.load(fold_ckpt))
         model.eval()
 
@@ -380,6 +408,18 @@ def train_eval_model(
         oof_probas[val_idx] = val_proba
 
     train_duration = time.time() - start_time
+
+    # Save aggregated model config and metadata PKL
+    model_summary_pkl = MODEL_DIR / f"{model_name.lower().replace(' ', '_')}_summary.pkl"
+    with open(model_summary_pkl, "wb") as pf:
+        pickle.dump({
+            "model_name": model_name,
+            "architecture": str(model_cls()),
+            "train_duration_sec": train_duration,
+            "oof_accuracy": accuracy_score(y_seq, oof_preds),
+            "oof_f1": f1_score(y_seq, oof_preds, zero_division=0),
+            "oof_roc_auc": roc_auc_score(y_seq, oof_probas),
+        }, pf)
 
     # Calculate Aggregated OOF Metrics
     acc = accuracy_score(y_seq, oof_preds)
@@ -443,6 +483,11 @@ def main():
         print(f"  -> Time     : {duration:.1f}s")
 
     df_comp = pd.DataFrame(all_metrics)
+
+    # Save benchmark metrics to CSV
+    benchmark_csv = RESULTS_DIR / "benchmark_metrics.csv"
+    df_comp.to_csv(benchmark_csv, index=False)
+    print(f"[SUCCESS] Saved Benchmark Metrics CSV to: {benchmark_csv}")
 
     # Save OOF predictions to file for error analysis & threshold tuning
     np.savez(
