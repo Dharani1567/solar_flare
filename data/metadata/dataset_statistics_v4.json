@@ -1,0 +1,26 @@
+{
+  "dataset_version": "dataset_v4",
+  "generated_timestamp": "2026-10-01T22:17:39.218152",
+  "total_observation_days": 216,
+  "sequence_count": 748,
+  "positive_samples_major_flare": 121,
+  "negative_samples_minor_event": 627,
+  "class_ratio": "5.18:1",
+  "tensor_shape": [
+    748,
+    3600,
+    4
+  ],
+  "data_type": "float32",
+  "storage_size_mb": 41.09,
+  "nan_count": 0,
+  "inf_count": 0,
+  "date_coverage": "2024-01-15 to 2026-09-30",
+  "new_samples_added": 16,
+  "channels": [
+    "HEL1OS CdTe 1 (10-20 keV)",
+    "HEL1OS CdTe 2 (20-50 keV)",
+    "HEL1OS CZT 1 (50-100 keV)",
+    "HEL1OS CZT 2 / SoLEXS (100-150 keV / 1-15 keV)"
+  ]
+}

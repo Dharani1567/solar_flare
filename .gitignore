@@ -7,6 +7,8 @@ __pycache__/
 *.pyo
 *.pyd
 .pytest_cache/
+.ipynb_checkpoints/
+*.log
 
 # IDE / OS
 .vscode/
@@ -14,7 +16,7 @@ __pycache__/
 .DS_Store
 *.swp
 
-# ISRO Raw & Extracted Data Archives (Large & Restricted Distribution)
+# ISRO Raw & Extracted Large Data Archives (Binary & Large Files)
 data/hel1os/raw/
 data/hel1os/extracted/
 data/hel1os/raw_downloads/
@@ -24,15 +26,34 @@ data/solexs/extracted/
 data/solexs/temp/
 data/ml/*.npy
 data/ml/*.npz
+data/ml/*.dat
+*.dat
+*.dat.*
+*.npy
+*.npz
 *.fits
 *.FITS
 *.zip
 *.ZIP
 *.gz
 *.tar
+*.pdf
 
-# Model Weight Checkpoints (Large Binaries)
+# Large dataset folders and download mirrors
+dataset_3000_samples/
+dataset_cleaned/
+dataset_forecast_augmented/
+dataset_forecast_v1/
+dataset_forecast_v2/
+dataset_pure_telemetry/
+pradan1.issdc.gov.in/
+scratch/
+kaggle_project/
+
+# Large Model Binaries in Results (kept local)
 results/models/*.pt
 results/models/*.joblib
 results/model_oof_predictions.npz
 results/explainability_attributions.npz
+results/kaggle_export/
+final_resnet1d.pth

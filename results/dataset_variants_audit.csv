@@ -1,0 +1,4 @@
+dataset_name,total_samples,timesteps,channels,positive_samples,negative_samples,imbalance_ratio,positive_percent,observation_days,unique_flare_events,nan_values,inf_values,all_flat_sequences,any_flat_channels,duplicate_samples,unique_duplicate_patterns,corrupted_spikes,group_kfold_leakage
+dataset_forecast_v2 (Main),1092,3600,4,273,819,3.0,25.0,91,273,0,0,706,971,704,7,2,0
+cleaned_dataset (Deduplicated),384,3600,4,99,285,2.88,25.78,34,99,0,0,0,264,0,0,0,0
+dataset_pure_telemetry (Strict),121,3600,4,33,88,2.67,27.27,11,33,0,0,0,0,0,0,1,0

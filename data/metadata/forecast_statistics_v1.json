@@ -1,0 +1,10 @@
+{
+  "total_samples": 1092,
+  "positive_samples": 273,
+  "negative_samples": 819,
+  "class_ratio": "3.00:1",
+  "min_minutes_until_flare": 5.43,
+  "max_minutes_until_flare": 59.76,
+  "pct_visible_inside_window": 0.0,
+  "rejection_rule_verified": true
+}

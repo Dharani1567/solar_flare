@@ -1,0 +1,19 @@
+{
+    "dataset_version": "dataset_forecast_v2",
+    "generated_timestamp": "2026-10-02T09:05:40.550140",
+    "total_samples": 1092,
+    "positive_samples": 273,
+    "negative_samples": 819,
+    "class_ratio": "3.00:1",
+    "in_window_flare_visibility_pct": 0.0,
+    "flare_event_leakage_pct": 0.0,
+    "synthetic_signals_present": false,
+    "min_minutes_until_flare": 15.0,
+    "max_minutes_until_flare": 59.0,
+    "data_shape": [
+        1092,
+        3600,
+        4
+    ],
+    "unique_flare_events": 273
+}

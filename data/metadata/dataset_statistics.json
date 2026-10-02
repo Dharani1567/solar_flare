@@ -1,0 +1,25 @@
+{
+  "dataset_version": "dataset_v3",
+  "generated_timestamp": "2026-10-01T20:55:21.036749",
+  "total_observation_days": 200,
+  "sequence_count": 732,
+  "positive_samples_major_flare": 114,
+  "negative_samples_minor_event": 618,
+  "class_ratio": "5.42:1",
+  "tensor_shape": [
+    732,
+    3600,
+    4
+  ],
+  "data_type": "float32",
+  "storage_size_mb": 40.21,
+  "nan_count": 0,
+  "inf_count": 0,
+  "date_coverage": "2024-01-15 to 2026-07-31",
+  "channels": [
+    "CdTe 1",
+    "CdTe 2",
+    "CZT 1",
+    "CZT 2"
+  ]
+}

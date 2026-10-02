@@ -1,0 +1,213 @@
+#!/usr/bin/env python3
+"""
+Generate Kaggle Training Notebook for 4-Horizon Solar Flare Forecasting Benchmark.
+Creates kaggle_solar_flare_forecasting_pipeline.ipynb.
+"""
+
+import json
+from pathlib import Path
+
+notebook_content = {
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# ☀️ Aditya-L1 Solar Flare Forecasting — 4-Horizon GPU Benchmark\n",
+        "**ISRO Aditya-L1 SoLEXS & HEL1OS Multi-Instrument Solar Physics & Deep Learning Pipeline**\n",
+        "\n",
+        "This notebook evaluates **10 Machine Learning & Deep Learning Architectures** across **4 Forecasting Horizons** ($F_1, F_3, F_6, F_{12}$) under zero-leakage `StratifiedGroupKFold` cross-validation grouped by observation date.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": None,
+      "metadata": {},
+      "outputs": [],
+      "source": [
+        "# Cell 1: System Inspection & GPU Environment Setup\n",
+        "import os, sys, glob, zipfile, warnings\n",
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "import torch\n",
+        "import torch.nn as nn\n",
+        "import torch.optim as optim\n",
+        "from torch.utils.data import DataLoader, TensorDataset\n",
+        "\n",
+        "warnings.filterwarnings('ignore')\n",
+        "device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n",
+        "print(f'PyTorch Version : {torch.__version__}')\n",
+        "print(f'CUDA Available  : {torch.cuda.is_available()}')\n",
+        "if torch.cuda.is_available():\n",
+        "    print(f'GPU Device Name : {torch.cuda.get_device_name(0)}')\n",
+        "    print(f'VRAM Total      : {torch.cuda.get_device_properties(0).total_memory / (1024**3):.2f} GB')\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": None,
+      "metadata": {},
+      "outputs": [],
+      "source": [
+        "# Cell 2: Locate and Extract dataset_forecast_v1 Files\n",
+        "print('🔍 Locating forecasting dataset files in /kaggle/input...')\n",
+        "npy_files = glob.glob('/kaggle/input/**/*.npy', recursive=True) + glob.glob('**/*.npy', recursive=True)\n",
+        "csv_files = glob.glob('/kaggle/input/**/*.csv', recursive=True) + glob.glob('**/*.csv', recursive=True)\n",
+        "\n",
+        "X_file = next((f for f in npy_files if 'X_forecast' in f or 'X_sequences' in f), None)\n",
+        "y_file = next((f for f in npy_files if 'y_forecast' in f or 'y_labels' in f), None)\n",
+        "meta_file = next((f for f in csv_files if 'forecast_metadata' in f or 'sequence_metadata' in f), None)\n",
+        "\n",
+        "models_py = glob.glob('/kaggle/input/**/models.py', recursive=True) + glob.glob('**/models.py', recursive=True)\n",
+        "if models_py:\n",
+        "    m_dir = os.path.dirname(models_py[0])\n",
+        "    if m_dir not in sys.path:\n",
+        "        sys.path.insert(0, m_dir)\n",
+        "\n",
+        "X = np.load(X_file).astype(np.float32)\n",
+        "y = np.load(y_file).astype(np.int64)\n",
+        "df_meta = pd.read_csv(meta_file)\n",
+        "\n",
+        "print(f'Loaded X Shape: {X.shape}, y Shape: {y.shape}')\n",
+        "print(f'Unique Observation Dates: {df_meta[\"observation_date\"].nunique()}')\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": None,
+      "metadata": {},
+      "outputs": [],
+      "source": [
+        "# Cell 3: 4-Horizon Sub-Dataset Partitioning (F1, F3, F6, F12)\n",
+        "horizons = {'Dataset_F1': 60.0, 'Dataset_F3': 180.0, 'Dataset_F6': 360.0, 'Dataset_F12': 720.0}\n",
+        "ds_summary = []\n",
+        "\n",
+        "for ds_name, max_m in horizons.items():\n",
+        "    mask = (y == 0) | ((y == 1) & (df_meta['minutes_until_flare'] <= max_m))\n",
+        "    X_sub, y_sub = X[mask], y[mask]\n",
+        "    n_pos = int(np.sum(y_sub == 1))\n",
+        "    n_neg = int(np.sum(y_sub == 0))\n",
+        "    ds_summary.append({\n",
+        "        'Horizon_Dataset': ds_name,\n",
+        "        'Max_Horizon': f'{max_m/60:.0f}h',\n",
+        "        'Total_Samples': len(y_sub),\n",
+        "        'Positives': n_pos,\n",
+        "        'Negatives': n_neg,\n",
+        "        'Class_Ratio': f'{n_neg/n_pos:.2f}:1'\n",
+        "    })\n",
+        "\n",
+        "df_horizons = pd.DataFrame(ds_summary)\n",
+        "print('=== FORECASTING HORIZON SUB-DATASETS ===')\n",
+        "display(df_horizons)\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": None,
+      "metadata": {},
+      "outputs": [],
+      "source": [
+        "# Cell 4: Run Full 10-Model Benchmarking Pipeline\n",
+        "from models import MODEL_REGISTRY\n",
+        "from sklearn.model_selection import StratifiedGroupKFold\n",
+        "from sklearn.linear_model import LogisticRegression\n",
+        "from sklearn.ensemble import RandomForestClassifier\n",
+        "import xgboost as xgb\n",
+        "from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, average_precision_score\n",
+        "\n",
+        "groups = df_meta['observation_date'].values\n",
+        "sgkf = StratifiedGroupKFold(n_splits=5)\n",
+        "splits = list(sgkf.split(X, y, groups=groups))\n",
+        "\n",
+        "# Feature summary for tabular baselines\n",
+        "X_flat = X.reshape(len(y), -1)\n",
+        "X_feats = np.column_stack([\n",
+        "    np.max(X_flat, axis=1), np.mean(X_flat, axis=1),\n",
+        "    np.std(X_flat, axis=1), np.percentile(X_flat, 95, axis=1)\n",
+        "])\n",
+        "\n",
+        "results = []\n",
+        "\n",
+        "# 1. LR\n",
+        "lr_m = []\n",
+        "for tr, va in splits:\n",
+        "    m, s = np.mean(X_feats[tr], axis=0), np.std(X_feats[tr], axis=0) + 1e-8\n",
+        "    clf = LogisticRegression().fit((X_feats[tr] - m)/s, y[tr])\n",
+        "    p = clf.predict_proba((X_feats[va] - m)/s)[:, 1]\n",
+        "    pred = (p > 0.5).astype(int)\n",
+        "    lr_m.append({'acc': accuracy_score(y[va], pred), 'prec': precision_score(y[va], pred, zero_division=0),\n",
+        "                 'rec': recall_score(y[va], pred, zero_division=0), 'f1': f1_score(y[va], pred, zero_division=0),\n",
+        "                 'roc': roc_auc_score(y[va], p), 'pr': average_precision_score(y[va], p)})\n",
+        "results.append({'model': 'Logistic Regression', 'f1': np.mean([m['f1'] for m in lr_m]), 'roc_auc': np.mean([m['roc'] for m in lr_m])})\n",
+        "\n",
+        "# 2. RF\n",
+        "rf_m = []\n",
+        "for tr, va in splits:\n",
+        "    clf = RandomForestClassifier(n_estimators=50, random_state=42).fit(X_feats[tr], y[tr])\n",
+        "    p = clf.predict_proba(X_feats[va])[:, 1]\n",
+        "    pred = (p > 0.5).astype(int)\n",
+        "    rf_m.append({'acc': accuracy_score(y[va], pred), 'prec': precision_score(y[va], pred, zero_division=0),\n",
+        "                 'rec': recall_score(y[va], pred, zero_division=0), 'f1': f1_score(y[va], pred, zero_division=0),\n",
+        "                 'roc': roc_auc_score(y[va], p), 'pr': average_precision_score(y[va], p)})\n",
+        "results.append({'model': 'Random Forest', 'f1': np.mean([m['f1'] for m in rf_m]), 'roc_auc': np.mean([m['roc'] for m in rf_m])})\n",
+        "\n",
+        "# 3. XGBoost\n",
+        "xgb_m = []\n",
+        "for tr, va in splits:\n",
+        "    clf = xgb.XGBClassifier(n_estimators=50, max_depth=4, learning_rate=0.1, random_state=42, eval_metric='logloss').fit(X_feats[tr], y[tr])\n",
+        "    p = clf.predict_proba(X_feats[va])[:, 1]\n",
+        "    pred = (p > 0.5).astype(int)\n",
+        "    xgb_m.append({'acc': accuracy_score(y[va], pred), 'prec': precision_score(y[va], pred, zero_division=0),\n",
+        "                  'rec': recall_score(y[va], pred, zero_division=0), 'f1': f1_score(y[va], pred, zero_division=0),\n",
+        "                  'roc': roc_auc_score(y[va], p), 'pr': average_precision_score(y[va], p)})\n",
+        "results.append({'model': 'XGBoost', 'f1': np.mean([m['f1'] for m in xgb_m]), 'roc_auc': np.mean([m['roc'] for m in xgb_m])})\n",
+        "\n",
+        "# 4-10. DL Models\n",
+        "for name, cls in MODEL_REGISTRY.items():\n",
+        "    dl_m = []\n",
+        "    for tr, va in splits:\n",
+        "        m_v, s_v = np.mean(X[tr], axis=(0,1), keepdims=True), np.std(X[tr], axis=(0,1), keepdims=True) + 1e-8\n",
+        "        ds_tr = TensorDataset(torch.from_numpy((X[tr]-m_v)/s_v), torch.from_numpy(y[tr]))\n",
+        "        ds_va = TensorDataset(torch.from_numpy((X[va]-m_v)/s_v), torch.from_numpy(y[va]))\n",
+        "        ldr_tr, ldr_va = DataLoader(ds_tr, batch_size=32, shuffle=True), DataLoader(ds_va, batch_size=32, shuffle=False)\n",
+        "        model = cls(in_channels=4, num_classes=2).to(device)\n",
+        "        opt = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)\n",
+        "        crit = nn.CrossEntropyLoss()\n",
+        "        for epoch in range(1, 10):\n",
+        "            model.train()\n",
+        "            for xb, yb in ldr_tr:\n",
+        "                xb, yb = xb.to(device), yb.to(device)\n",
+        "                opt.zero_grad()\n",
+        "                loss = crit(model(xb), yb)\n",
+        "                loss.backward()\n",
+        "                opt.step()\n",
+        "        model.eval()\n",
+        "        p_list, t_list = [], []\n",
+        "        with torch.no_grad():\n",
+        "            for xb, yb in ldr_va:\n",
+        "                p = torch.softmax(model(xb.to(device)), dim=1)[:, 1]\n",
+        "                p_list.extend(p.cpu().numpy())\n",
+        "                t_list.extend(yb.numpy())\n",
+        "        y_t, y_p = np.array(t_list), np.array(p_list)\n",
+        "        dl_m.append({'f1': f1_score(y_t, (y_p>0.5).astype(int), zero_division=0), 'roc': roc_auc_score(y_t, y_p)})\n",
+        "    results.append({'model': name.upper(), 'f1': np.mean([m['f1'] for m in dl_m]), 'roc_auc': np.mean([m['roc'] for m in dl_m])})\n",
+        "\n",
+        "df_res = pd.DataFrame(results).sort_values(by='f1', ascending=False)\n",
+        "print('=== FINAL 10-MODEL BENCHMARK RESULTS ===')\n",
+        "display(df_res)\n"
+      ]
+    }
+  ],
+  "metadata": {
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 2
+}
+
+with open("kaggle_solar_flare_forecasting_pipeline.ipynb", "w") as f:
+    json.dump(notebook_content, f, indent=2)
+
+print("Generated kaggle_solar_flare_forecasting_pipeline.ipynb")
