@@ -1,6 +1,0 @@
-model_name,accuracy,precision,recall,f1_score,roc_auc,pr_auc,training_time_sec
-Logistic Regression,0.7107,0.4167,0.1515,0.2222,0.4756,0.3352,0.06
-Random Forest,0.719,0.4,0.0606,0.1053,0.3903,0.2501,0.56
-XGBoost,0.595,0.1364,0.0909,0.1091,0.3227,0.2329,1.09
-1D CNN,0.719,0.0,0.0,0.0,0.4525,0.2801,20.67
-ResNet1D,0.6364,0.1765,0.0909,0.12,0.418,0.246,92.97

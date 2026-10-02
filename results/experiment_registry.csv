@@ -1,5 +1,0 @@
-Experiment ID,Model Architecture,Dataset Version,Accuracy,Precision,Recall (POD),F1 Score,ROC-AUC,PR-AUC,TSS,HSS,Train Time,Output Checkpoints
-EXP-01,1D CNN Baseline,"V2.0 Expanded (732, 3600, 4)",0.6803,0.3544,0.886,0.5063,0.8798,0.4682,0.5284,0.303,224.5s,results/models/1d_cnn_baseline_fold_1..5.pt
-EXP-02,CNN + BiLSTM Hybrid,"V2.0 Expanded (732, 3600, 4)",0.8388,0.4897,0.8333,0.6169,0.9054,0.5842,0.6731,0.5234,1020.4s,results/models/cnn_+_bilstm_hybrid_fold_1..5.pt
-EXP-03,CNN + Attention + BiLSTM,"V2.0 Expanded (732, 3600, 4)",0.8607,0.5448,0.6404,0.5887,0.887,0.5512,0.5416,0.5055,630.3s,results/models/cnn_+_attention_+_bilstm_fold_1..5.pt
-EXP-04,Temporal Convolutional Network (TCN),"V2.0 Expanded (732, 3600, 4)",0.825,0.465,0.78,0.582,0.891,0.542,0.612,0.489,1620.0s,results/models/temporal_convolutional_network_(tcn)_fold_1..5.pt

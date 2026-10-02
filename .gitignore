@@ -16,17 +16,7 @@ __pycache__/
 .DS_Store
 *.swp
 
-# ISRO Raw & Extracted Large Data Archives (Binary & Large Files)
-data/hel1os/raw/
-data/hel1os/extracted/
-data/hel1os/raw_downloads/
-data/hel1os/temp/
-data/solexs/raw/
-data/solexs/extracted/
-data/solexs/temp/
-data/ml/*.npy
-data/ml/*.npz
-data/ml/*.dat
+# Binaries & Datasets
 *.dat
 *.dat.*
 *.npy
@@ -38,22 +28,54 @@ data/ml/*.dat
 *.gz
 *.tar
 *.pdf
-
-# Large dataset folders and download mirrors
-dataset_3000_samples/
-dataset_cleaned/
-dataset_forecast_augmented/
-dataset_forecast_v1/
-dataset_forecast_v2/
-dataset_pure_telemetry/
+data/
+dataset_*
 pradan1.issdc.gov.in/
 scratch/
 kaggle_project/
+results/
 
-# Large Model Binaries in Results (kept local)
-results/models/*.pt
-results/models/*.joblib
-results/model_oof_predictions.npz
-results/explainability_attributions.npz
-results/kaggle_export/
+# Legacy and Non-Core Files
+README.md
+hel1os_*.py
+solexs_*.py
+flare_examples.png
+kaggle_inference.ipynb
+kaggle_notebook_v5.py
+kaggle_solar_flare_forecasting_pipeline.ipynb
+kaggle_train_all_models.ipynb
+FINAL_DATASET_AND_KAGGLE_REPORT.md
+cleanup_and_expansion_plan.md
+college_project_report.md
+dataset_expansion_*.md
+final_project_report.md
+final_storage_verification_report.md
+groupkfold_validation_report.md
+leakage_audit_report.md
+restore_project.md
+storage_audit_report.md
+
+# Non-Core Scripts
+scripts/audit_*
+scripts/build_*
+scripts/cleanup_*
+scripts/expand_*
+scripts/export_*
+scripts/full_*
+scripts/generate_forecasting_*
+scripts/generate_kaggle_*
+scripts/generate_sample_*
+scripts/kaggle_train_*
+scripts/leakage_*
+scripts/prepare_*
+scripts/run_*
+scripts/test_*
+scripts/train_7_*
+scripts/train_all_*
+scripts/train_architecture_*
+scripts/train_benchmark_*
+scripts/train_cnn_*
+scripts/train_pure_*
+scripts/update_*
+scripts/utils.py
 final_resnet1d.pth
