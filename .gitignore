@@ -16,10 +16,9 @@ __pycache__/
 .DS_Store
 *.swp
 
-# Binaries & Datasets
+# Binaries & Large Datasets
 *.dat
 *.dat.*
-*.npy
 *.npz
 *.fits
 *.FITS
@@ -33,10 +32,20 @@ dataset_*
 pradan1.issdc.gov.in/
 scratch/
 kaggle_project/
-results/
+results/*
+!results/models/
+results/models/*
+!results/models/final_*.pt
+
+# Allow sample test inputs
+!sample_test_inputs/
+!sample_test_inputs/**
+
+# Ignore README as requested
+README.md
+kaggle_package/README.md
 
 # Legacy and Non-Core Files
-README.md
 hel1os_*.py
 solexs_*.py
 flare_examples.png
@@ -78,4 +87,8 @@ scripts/train_cnn_*
 scripts/train_pure_*
 scripts/update_*
 scripts/utils.py
-final_resnet1d.pth
+scripts/analyze_pradan_dates.py
+scripts/forensic_verification.py
+scripts/repo_duplicate_audit.py
+scripts/verify_splits.py
+final_resnet1d.pthall_models_architecture_ai.png
